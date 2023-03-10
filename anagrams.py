@@ -59,7 +59,6 @@ while x < 6:
 
 print("Welcome to Anagrams. Make as many words as you can with the given letters!")
 print("Your letters are: ", letters)
-countdown(int(10))
 game = True; 
 while game == True:
   word = input("Guess: ")
