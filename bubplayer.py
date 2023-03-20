@@ -1,12 +1,20 @@
 class Player:
-    def __init__(self, p_id):
+    def __init__(self, m):
         self.lives = 3
-        self.player_id = p_id
+        self.msg_obj = m
 
-    def sendLives(self):
+    def getLives(self):
         return self.lives
 
-    def sendID(self):
-        return self.player_id
+    def getMsgObj(self):
+        return self.msg_obj
 
-    
+    def lifeLoss(self):
+        self.lives -= 1
+        print(f"{self.msg_obj.author.name} has {self.lives} lives")
+
+    def getLifeStatus(self):
+        if self.lives <= 0:
+            return False
+        else:
+            return True

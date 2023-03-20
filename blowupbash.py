@@ -1,6 +1,7 @@
 import asyncio
 import random
 import time
+from bubplayer import Player
 
 with open("dictionary.txt", "r") as dict:
     dictionary = dict.read().lower().split("\n")
@@ -10,7 +11,7 @@ games = []
 
 class BlowUpBash:
     def __init__(self):
-        self.previous_guesses = []
+        self.used_words = []
         self.play = True
         self.players = []
         self.joinable = True
@@ -27,32 +28,41 @@ class BlowUpBash:
 
         if len(self.players) < 2:
             await ctx.send("Not enough players. Canceling game...")
+            await welcome_msg.edit(content="Game cancelled.")
 
         self.joinable = False
         await welcome_msg.edit(content="Game has started.")
         await ctx.send("Game is starting!")
         player_names = ""
         for i in self.players:
-            print(i.name)
-            player_names += i.name + ", "
+            print(i.getMsgObj().author.name)
+            player_names += i.getMsgObj().author.name + ", "
         await ctx.send(f"Players in this game: {player_names}")
 
         def checkMsg(p):
-            return p.channel == ctx.channel and p.author.id == self.players[self.turn].id and prompt in p.content.lower() and p.content.lower() in dictionary
+            return p.channel == ctx.channel and p.author.id == self.players[self.turn].getMsgObj().author.id and prompt in p.content.lower() and p.content.lower() in dictionary and p.content not in self.used_words
 
         while self.play:
             prompt = await generatePrompt(ctx)
-            await ctx.send(f"{self.players[self.turn].mention}'s turn! Your prompt is: {prompt}")
+            await ctx.send(f"{self.players[self.turn].getMsgObj().author.mention}'s turn! Your prompt is: {prompt}")
             try:
                 msg = await client.wait_for("message", timeout=random.randrange(1, 20), check=checkMsg)
-                await ctx.send(f"{msg.content} is a valid guess")
+                await ctx.send(f"{msg.content.lower()} is a valid guess")
+                self.used_words.append(msg.content)
+                print(self.used_words)
             except asyncio.TimeoutError:
                 await ctx.send("Time over!")
+                self.players[self.turn].lifeLoss()
 
-            if self.turn < len(self.players)-1:
-                self.turn += 1
+            current_turn = self.turn
+            next_turn = self.turn + 1
+            if next_turn < len(self.players)-1:
+                if self.players[next_turn].getLifeStatus():
+                    print("e")
             else:
                 self.turn = 0
+
+        await ctx.send("Game over!")
 
 
 async def generatePrompt(ctx):
@@ -75,6 +85,7 @@ async def generatePrompt(ctx):
 async def addPlayers(msg):
     global games
     for i in games:
-        if i.joinable:
-            i.players.append(msg.author)
+        if i.joinable and msg.author not in i.players:
+            player = Player(msg)
+            i.players.append(player)
             break
