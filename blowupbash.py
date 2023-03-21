@@ -56,13 +56,26 @@ class BlowUpBash:
 
             current_turn = self.turn
             next_turn = self.turn + 1
-            if next_turn < len(self.players)-1:
-                if self.players[next_turn].getLifeStatus():
-                    print("e")
-            else:
-                self.turn = 0
+            next_turn_found = False
+            while not next_turn_found:
+                if next_turn < len(self.players) and next_turn != current_turn:
+                    print(0)
+                    if self.players[next_turn].isAlive():
+                        print(f"next player: {self.players[next_turn].getMsgObj().author} life status: {self.players[next_turn].isAlive()}")
+                        next_turn_found = True
+                        self.turn = next_turn
+                    else:
+                        print(2)
+                        next_turn += 1
+                elif next_turn == current_turn:
+                    print(4)
+                    self.play = False
+                    break
+                else:
+                    print(3)
+                    next_turn = 0
 
-        await ctx.send("Game over!")
+        await ctx.send(f"Game over! {self.players[self.turn].getMsgObj().author.mention} wins!")
 
 
 async def generatePrompt(ctx):
@@ -84,8 +97,13 @@ async def generatePrompt(ctx):
 
 async def addPlayers(msg):
     global games
+    already_joined = False
     for i in games:
-        if i.joinable and msg.author not in i.players:
-            player = Player(msg)
-            i.players.append(player)
-            break
+        if i.joinable:
+            for j in i.players:
+                if j.getMsgObj().author == msg.author:
+                    already_joined = True
+            if not already_joined:
+                player = Player(msg)
+                i.players.append(player)
+                break

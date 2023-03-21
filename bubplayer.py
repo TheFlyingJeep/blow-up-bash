@@ -13,7 +13,7 @@ class Player:
         self.lives -= 1
         print(f"{self.msg_obj.author.name} has {self.lives} lives")
 
-    def getLifeStatus(self):
+    def isAlive(self):
         if self.lives <= 0:
             return False
         else:
