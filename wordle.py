@@ -1,10 +1,11 @@
-import discord, json
-from discord.ext import commands
 import random
-import requests
 import asyncio
-inte = discord.Intents.all()
-client = commands.Bot(command_prefix="racc ", case_insensitive=True, intents=inte)
+
+with open('valid_words.txt') as f:
+    data = f.read()
+
+with open ("pydle_words.txt", "r") as file: 
+    words = file.read()
 
 letters = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z']
 green_letters = ['<:a_green:1080896945444356166>', '<:b_green:1080896994337362060>', '<:c_green:1080896995264303144>', '<:d_green:1080896997386616862>', '<:e_green:1080896998284214332>', '<:f_green:1080896999563464785>', '<:g_green:1080897048947196016>', '<:h_green:1080897049974800465>', '<:i_green:1080897051413454942>', '<:j_green:1080897053015679066>', '<:k_green:1080897054219440189>', '<:l_green:1080897135991607327>', '<:m_green:1080897137442836491>', '<:n_green:1080897138692722778>', '<:o_green:1080897139841978398>', '<:p_green:1080897140882153662>', '<:q_green:1080897167385968750>', '<:r_green:1080897169583771648>', '<:s_green:1080897172108759101>', '<:t_green:1080898104150196234>', '<:u_green:1080897174516285440>', '<:v_green:1080897176298864650>', '<:w_green:1080897210612457584>', '<:x_green:1080897213422637076>', '<:y_green:1080897214265704496>', '<:z_green:1080897215725310102>']
@@ -12,11 +13,10 @@ yellow_letters = ['<:a_yellow:1080889822756999301>', '<:b_yellow:108088996582472
 gray_letters = ['<:a_gray:1079602623348478053>', '<:b_gray:1079603340721279016>', '<:c_gray:1079603798751838299>', '<:d_gray:1079604022190800907>', '<:e_gray:1079604218459082843>', '<:f_gray:1079606364982231114>', '<:g_gray:1079606608625160222>', '<:h_gray:1079607016709959710>', '<:i_gray:1079608947201294366>', '<:j_gray:1079608948849643560>', '<:k_gray:1079608949810155650>', '<:l_gray:1079608950443495466>', '<:m_gray:1079608952268017804>', '<:n_gray:1079608953886998578>', '<:o_gray:1079608955250147360>', '<:p_gray:1079610657147736175>', '<:q_gray:1079610659756593254>', '<:r_gray:1079610660448641066>', '<:s_gray:1079610780359606282>', '<:t_gray:1079610781924077649>', '<:u_gray:1079610783165587518>', '<:v_gray:1079610784985927791>', '<:w_gray:1079610786713964544>', '<:x_gray:1079610788026794005>', '<:y_gray:1079610789293473863>', '<:z_gray:1079610791088627732>']
 corr_letters = []
 def valid_word(guess):
-    with open('valid_words.txt') as f:
-        if guess in f.read():
-            return True
-        else:
-            return False
+    if guess in data:
+        return True
+    else:
+        return False
 
 
 
@@ -25,7 +25,7 @@ def display_guess(guess, answer):
 
     print(guess)
     
-    guess_msg = "";
+    guess_msg = ""
     guess_msg_array = [*guess]
     answer_array = [*answer]
     letters_left = [*answer]
@@ -33,7 +33,7 @@ def display_guess(guess, answer):
     print (answer_array)
     colorArr = []
 
-    i = 0;
+    i = 0
 
     for char, g in zip(answer,guess):
         print(guess_msg_array[i])
@@ -50,7 +50,7 @@ def display_guess(guess, answer):
             # colorArr.append("gray")
             guess_msg += gray_letters[ind]
 
-        print(colorArr)
+    return guess_msg
 
 
         
@@ -106,47 +106,7 @@ def display_guess(guess, answer):
         #     # else:
         #         # guess_msg += gray_letters[letters.index(guess[i])]
 
-    return guess_msg;
-
-
-with open("bot_key.txt", "r") as file:
-     botKey = file.read().strip()
-     
-# with open("nasa_key.txt", "r") as file:
-#      nasaKey = file.read().strip()
-
-@client.command()
-async def test(ctx): 
-    await ctx.send("racc test but lureen")
-
-
-@client.command()
-async def meme(ctx): 
-    # open txt file
-    with open("raccbotlinks.txt", "r") as file:
-        raccLinks = file.read()
-    
-    # splits string into list
-    memeList = raccLinks.splitlines()
-    
-    await ctx.send(random.choice(memeList))
-
-@client.command()
-async def bored(ctx):
-    async with ctx.typing():
-        response = requests.get("https://www.boredapi.com/api/activity").json()
-        await ctx.send((response["activity"]).lower() + "!")
-        
-@client.command()
-async def apod(ctx):
-    async with ctx.typing():
-        response = requests.get("https://api.nasa.gov/planetary/apod?api_key=" + nasaKey).json()
-        await ctx.send("**" + response["title"] + "**: " + response["date"])
-        await ctx.send(response["hdurl"])
-        await ctx.send("||" + response["explanation"] + "||")
-
-@client.command()
-async def pydle(ctx):
+async def pydle(ctx, client):
 
     def valid_guess(p):
          # input checking yay!
@@ -163,16 +123,14 @@ async def pydle(ctx):
             return True
 
 
-
     async with ctx.typing():
         # intro + selects a word
         await ctx.send("Welcome to Pydle: a programming-themed word game!")
-        with open ("pydle_words.txt", "r") as file: 
-            words = file.read()
+        await ctx.send("Welcome to Pydle, a coding-theme Wordle!\nEnter in a valid, 5 letter guess below.\n🟩 : Letter is correct AND in the right place\n🟨 : Letter is in the word BUT not in the right place (in development) \n⬜ : Letter is NOT in the word \nYou have 6 guesses, good luck!")
         chosen_word = random.choice(words.splitlines())
         # await ctx.send(chosen_word)
 
-        guess_count = 1;
+        guess_count = 1
         while guess_count < 6:
             await ctx.send("Guess " + str(guess_count) + " out of 6")
             await ctx.send("Please type in a 5 letter guess below: ")
@@ -216,10 +174,3 @@ async def pydle(ctx):
             except asyncio.TimeoutError:
                 await ctx.send("Oops, this Pydle has timed out! Start a new game with `racc pydle`")
                 break
-
-
-        
-
-
-     
-client.run(botKey)

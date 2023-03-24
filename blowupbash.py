@@ -10,12 +10,13 @@ games = []
 
 
 class BlowUpBash:
-    def __init__(self):
+    def __init__(self, ctx):
         self.used_words = []
         self.play = True
         self.players = []
         self.joinable = True
         self.turn = 0
+        self.ctx = ctx
 
     async def game(self, ctx, client):
         welcome_msg = await ctx.send(
@@ -103,6 +104,7 @@ async def addPlayers(msg):
                 if j.getMsgObj().author == msg.author:
                     already_joined = True
             if not already_joined:
-                player = Player(msg)
-                i.players.append(player)
-                break
+                if msg.channel == i.ctx.channel:
+                    player = Player(msg)
+                    i.players.append(player)
+                    break
